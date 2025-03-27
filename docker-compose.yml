@@ -1,0 +1,60 @@
+version: "3.9"
+services:
+  app:
+    build : .
+    container_name: project12-app
+    environment:
+        - "ACTION=${ACTION}"
+    command: ["./entrypoint.sh", "$ACTION"]
+    restart: unless-stopped
+    working_dir: /var/www/
+    ports :
+        - ${APP_PORT}:8000
+    volumes:
+        - ./:/var/www
+        -  /var/www/vendor
+    networks: 
+        - project12-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+  mysql:
+    image: mysql:8.3.0
+    container_name : project12-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE      : ${DB_DATABASE}
+      MYSQL_PASSWORD      : ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD : ${DB_PASSWORD}
+    volumes:
+        - ./.docker/mysql:/var/lib/mysql
+    ports:
+        - ${DB_EXPOSE_PORT}:3306
+    healthcheck:
+        test:
+            [
+              "CMD",
+              "mysqladmin",
+              "ping",
+              "-h",
+              "localhost",
+              "-u",
+              "root",
+              "-p$$MYSQL_ROOT_PASSWORD",
+            ]
+        timeout: 5s
+        retries: 10
+    networks:
+        - project12-net
+      
+  apache:
+    image : httpd:2.4.59
+    container_name : project12-ws
+    restart: unless-stopped
+    ports:
+      - 8082:80
+    networks :
+      - project12-net
+networks : 
+  project12-net:
+    driver: bridge
