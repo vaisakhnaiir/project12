@@ -29,4 +29,6 @@ jobs:
 
     - name: Push Docker image to registry
       run: docker push ${{ secrets.DOCKER_USERNAME }}/project12:latest
+
+      
     
