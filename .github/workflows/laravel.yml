@@ -24,7 +24,7 @@ jobs:
     - name: Build Docker image
       run: docker build -t project12:latest .
 
-    - name: Push Docker image to registry
-      run: docker push project12:latest
+    - name: Push Docker image to Docker Hub
+      run: docker push ${{ secrets.DOCKER_NAME }}/project12:latest
 
     
